@@ -15,4 +15,5 @@ jobs:
         run: |
           sh tools/assemble.sh
           node test/test.js
+          node test/files.js
           sh test/mutants.sh

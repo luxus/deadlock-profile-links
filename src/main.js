@@ -1,4 +1,4 @@
-const VERSION = '1.0.0';
+const VERSION = '1.0.1';
 const LINKS_DEFAULT = true;
 const TICK_S = 1;
 const CACHE_MS = 600000;
@@ -94,28 +94,33 @@ const accountFrom = root => {
 	if (!ok(root)) return '';
 	const hidden = readText(probe(root, '_plHidden', 'PlAccountId'));
 	const direct = readText(probe(root, '_plDirect', 'PlAccountIdDirect'));
-	const agreed = agree(hidden, direct);
-	if (agreed) return agreed;
+	const player = readText(probe(root, '_plPlayer', 'PlAccountIdPlayer'));
+	const playerRoot = readText(probe(root, '_plPlayerRoot', 'PlAccountIdPlayerRoot'));
+	const a = agree(hidden, direct);
+	const b = agree(player, playerRoot);
+	if (a && b && a !== b) return '';
+	if (a || b) return a || b;
 	const friend = root.FindChildTraverse('FriendID');
-	if (ok(friend)) { const a = parseAccount(readText(friend)); if (a) return a; }
+	if (ok(friend)) { const id = parseAccount(readText(friend)); if (id) return id; }
 	const acc = root.FindChildTraverse('AccountID');
 	if (ok(acc)) {
 		const n = acc.GetChildCount ? acc.GetChildCount() : 0;
-		for (let i = 0; i < n; i++) { const a = parseAccount(readText(acc.GetChild(i))); if (a) return a; }
-		const a = parseAccount(readText(acc)); if (a) return a;
+		for (let i = 0; i < n; i++) { const id = parseAccount(readText(acc.GetChild(i))); if (id) return id; }
+		const id = parseAccount(readText(acc)); if (id) return id;
 	}
 	return '';
 };
 
 const makeBtn = (parent, id, logoClass, title, which) => {
 	let b = parent.FindChild(id);
-	if (ok(b)) return b;
-	b = $.CreatePanel('Button', parent, id);
-	b.AddClass('PlButton');
-	const logo = $.CreatePanel('Panel', b, '');
-	logo.AddClass('PlLogo');
-	logo.AddClass(logoClass);
-	logo.hittest = false;
+	if (!ok(b)) {
+		b = $.CreatePanel('Button', parent, id);
+		b.AddClass('PlButton');
+		const logo = $.CreatePanel('Panel', b, '');
+		logo.AddClass('PlLogo');
+		logo.AddClass(logoClass);
+		logo.hittest = false;
+	}
 	b.SetPanelEvent('onactivate', () => {
 		const box = b.GetParent();
 		const acc = ok(box) ? box.GetAttributeString('account', '') : '';
@@ -126,21 +131,26 @@ const makeBtn = (parent, id, logoClass, title, which) => {
 const parentFor = (root, kind) => {
 	if (kind === 'page') return root.FindChildTraverse('ProfileInfo') || root;
 	if (kind === 'card') return root.FindChild('AccountID') || root;
-	return root.FindChildTraverse('PlayerNameContainer') || root;
+	// Scoreboard: a sibling of the stats row, not inside the tight name column.
+	return root;
 };
 const ensureHost = (root, kind) => {
 	if (ok(root._plBox)) return root._plBox;
 	let box = root.FindChildTraverse('PlRoot');
-	if (ok(box)) { root._plBox = box; return box; }
-	const parent = parentFor(root, kind);
-	if (!ok(parent)) return null;
-	box = $.CreatePanel('Panel', parent, 'PlRoot');
-	box.AddClass('PlRoot');
-	box.AddClass(kind === 'page' ? 'Pl_page' : kind === 'card' ? 'Pl_card' : 'Pl_row');
-	const badge = $.CreatePanel('Image', box, 'PlBadge');
-	badge.AddClass('PlBadge');
-	badge.hittest = false;
-	show(badge, false);
+	if (!ok(box)) {
+		const parent = parentFor(root, kind);
+		if (!ok(parent)) return null;
+		box = $.CreatePanel('Panel', parent, 'PlRoot');
+		box.AddClass('PlRoot');
+		box.AddClass(kind === 'page' ? 'Pl_page' : kind === 'card' ? 'Pl_card' : 'Pl_row');
+		if (kind === 'row') box.AddClass('PlSlot');
+		if (kind !== 'row') {
+			const badge = $.CreatePanel('Image', box, 'PlBadge');
+			badge.AddClass('PlBadge');
+			badge.hittest = false;
+			show(badge, false);
+		}
+	}
 	makeBtn(box, 'PlStatlocker', 'PlLogoStatlocker', 'Statlocker', 'statlocker');
 	makeBtn(box, 'PlDeadchaps', 'PlLogoDeadchaps', 'DeadChaps', 'deadchaps');
 	root._plBox = box;

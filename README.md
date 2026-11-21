@@ -10,7 +10,9 @@ Listed in the [luxus Deadlock mods](https://luxus.github.io/deadlock-mods/) regi
 
 - Rank badge from `https://api.deadlock-api.com/v1/players/<id>/rank/image?format=webp`
 - Buttons that open `https://statlocker.gg/profile/<id>` and `https://www.deadchaps.gg/player/<id>/`
-- Account ids from Valve data-binding probes, also accepting a SteamID3 or a Steam64
+- On the post-game scoreboard the Statlocker and DeadChaps logos sit in a slot after each player's stats row, next to the name
+- Compiled logo textures (`statlocker_png.vtex` / `deadchaps_png.vtex`), built from the sites' own icons
+- Account ids from Valve data-binding probes (`account_id` and `player_account_id`), also accepting a SteamID3 or a Steam64
 - One "Profile links" toggle in settings (on by default)
 - A "Profile Links" tab in [CompLock HUD++](https://deadlockconfig.com/), or an ADDONS window in the Esc menu without HUD++
 - "Reset Profile Links" on the right of the settings foot puts the toggle back to the default
@@ -27,6 +29,7 @@ Needs [modlock](https://github.com/paralin/modlock) (or set `MODLOCK` to a local
 # optional: MODLOCK=/path/to/modlock
 sh tools/assemble.sh
 node test/test.js
+node test/files.js
 sh test/mutants.sh
 sh tools/build.sh   # writes build/deadlock-profile-links.vpk
 ```
@@ -36,9 +39,9 @@ sh tools/build.sh   # writes build/deadlock-profile-links.vpk
 Do this only while Deadlock is not running.
 
 - With [shiv](https://github.com/luxus/shiv) or [Deadlock Mod Manager](https://deadlockmods.app/): add the source `https://luxus.github.io/deadlock-mods/dmm-source.json` and install Deadlock Profile Links, or use the buttons on https://luxus.github.io/deadlock-mods/ and https://luxus.github.io/deadlock-profile-links/.
-- Manual: download `deadlock-profile-links-1.0.0.vpk` from the [GitHub release](https://github.com/luxus/deadlock-profile-links/releases/tag/v1.0.0), rename it to a free slot such as `pak08_dir.vpk` or later, and put it into `Deadlock/game/citadel/addons/`. Slots 01–07 are reserved for CompLock. [CompLock HUD++](https://deadlockconfig.com/) is optional.
+- Manual: download `deadlock-profile-links-1.0.1.vpk` from the [GitHub release](https://github.com/luxus/deadlock-profile-links/releases/tag/v1.0.1), rename it to a free slot such as `pak08_dir.vpk` or later, and put it into `Deadlock/game/citadel/addons/`. Slots 01–07 are reserved for CompLock. [CompLock HUD++](https://deadlockconfig.com/) is optional.
 
-Start Deadlock, open a profile, and check the console for `Deadlock Profile Links: 1.0.0 loaded`.
+Start Deadlock, open the post-game scoreboard, and check that the Statlocker and DeadChaps icons sit next to each player. The console should show `Deadlock Profile Links: 1.0.1 loaded`.
 
 ## License
 

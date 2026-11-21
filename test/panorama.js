@@ -88,11 +88,16 @@ const filler = (parent, n, tag) => { for (let i = 0; i < n; i++) { const a = mk(
 const probes = parent => {
 	mk('Label', parent, 'PlAccountId', 'PlProbe', '');
 	mk('Label', parent, 'PlAccountIdDirect', 'PlProbe', '');
+	mk('Label', parent, 'PlAccountIdPlayer', 'PlProbe', '');
+	mk('Label', parent, 'PlAccountIdPlayerRoot', 'PlProbe', '');
 };
-const setAccount = (root, hidden, direct) => {
+const setAccount = (root, hidden, direct, player, playerRoot) => {
 	const h = root.FindChildTraverse('PlAccountId'), d = root.FindChildTraverse('PlAccountIdDirect');
+	const p = root.FindChildTraverse('PlAccountIdPlayer'), r = root.FindChildTraverse('PlAccountIdPlayerRoot');
 	if (h) h._text = hidden == null ? '' : String(hidden);
 	if (d) d._text = direct == null ? '' : String(direct);
+	if (p && player !== undefined) p._text = player == null ? '' : String(player);
+	if (r && playerRoot !== undefined) r._text = playerRoot == null ? '' : String(playerRoot);
 };
 
 const H = { root: null, ctx: null, esc: null, menu: null, tab: 'hud', tabs: {}, hudBody: null, mmBody: null, xhBody: null, foot: null, menuButton: null, page: null, card: null, board: null, clicks: [], model: 'new' };
@@ -152,13 +157,19 @@ const shown = p => {
 
 const press = (b, xml) => { const hs = handlers.filter(h => h.p === b && h.ev === 'Activated'); if (hs.length) { hs.forEach(h => h.f(b)); return; } xml(); };
 
-const playerRow = (parent, name, hidden, direct) => {
+const playerRow = (parent, name, hidden, direct, extra) => {
 	const row = mk('Panel', parent, '', 'Player');
 	const info = mk('Panel', row, '', 'PlayerInfoContainer');
 	probes(info);
 	const names = mk('Panel', info, '', 'PlayerNameContainer');
 	mk('Label', names, 'PlayerName', '', name);
-	setAccount(row, hidden, direct);
+	mk('Panel', row, '', 'PlayerRow');
+	if (extra && extra.layoutSlot) {
+		const slot = mk('Panel', row, 'PlRoot', 'PlRoot PlSlot Pl_row');
+		mk('Button', slot, 'PlStatlocker', 'PlButton');
+		mk('Button', slot, 'PlDeadchaps', 'PlButton');
+	}
+	setAccount(row, hidden, direct, extra && extra.player, extra && extra.playerRoot);
 	return row;
 };
 
@@ -187,7 +198,7 @@ const buildWorld = (opts = {}) => {
 		{ name: 'Kai', hidden: '76561198000000000', direct: '' },
 		{ name: 'Ally', hidden: '2000001', direct: '2000001' },
 		{ name: 'Foe', hidden: '[U:1:3000001]', direct: '3000001' }
-	]).map(r => playerRow(players, r.name, r.hidden, r.direct));
+	]).map(r => playerRow(players, r.name, r.hidden, r.direct, r));
 	setAccount(page, opts.pageHidden || '1234567', opts.pageDirect || '1234567');
 	setAccount(card, opts.cardHidden || '1234567', opts.cardDirect || '1234567');
 	H.ctx = opts.ctx === 'card' ? card : opts.ctx === 'board' ? board : page;
