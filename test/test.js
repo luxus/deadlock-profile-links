@@ -22,7 +22,7 @@ const bodies = () => [['hud', H.hudBody], ['mm', H.mmBody], ['xh', H.xhBody], ['
 start();
 assert(S.errors.length === 0, 'no errors at start: ' + S.errors.join(' | '));
 assert(/const LINKS_DEFAULT = true;/.test(SRC), 'Profile links on by default');
-assert(S.info.some(m => /Deadlock Profile Links: 1.0.0 loaded/.test(m)), 'console line 1.0.0 loaded: ' + S.info.join(' | '));
+assert(S.info.some(m => /Deadlock Profile Links: 1.0.1 loaded/.test(m)), 'console line 1.0.1 loaded: ' + S.info.join(' | '));
 assert(T().TICK_S === 1, 'tick is 1 Hz, not a frame poll');
 assert(!/0\.016/.test(SRC), 'no 0.016 s / ~60 Hz interval in the built script');
 
@@ -101,11 +101,33 @@ assert(byId('PlBadge', H.card).img.indexOf('4000001') >= 0, 'profile card: badge
 start({ ctx: 'board' });
 const rowRoots = H.rows.map(r => byId('PlRoot', r));
 assert(rowRoots.every(Boolean) && rowRoots.every(shown), 'scoreboard: a link row on every player');
+assert(rowRoots.every(box => box.GetParent() === box.GetParent() && H.rows.includes(box.GetParent())), 'scoreboard: slot is a child of the Player row');
+assert(rowRoots.every(box => {
+	const names = box.GetParent().FindChildTraverse('PlayerNameContainer');
+	let p = box;
+	while (p) { if (p === names) return false; p = p.GetParent(); }
+	return true;
+}), 'scoreboard: slot is not inside the name column');
 assert(byId('PlRoot', H.rows[1]).GetAttributeString('account', '') === '2000001', 'scoreboard: ally account');
 assert(byId('PlRoot', H.rows[2]).GetAttributeString('account', '') === '3000001', 'scoreboard: SteamID3 account');
 overlay.urls = [];
 byId('PlStatlocker', H.rows[1]).events.onactivate();
 assert(overlay.urls.includes('https://statlocker.gg/profile/2000001'), 'scoreboard Statlocker click');
+
+// scoreboard rows often bind {i:player_account_id} rather than {i:account_id}
+start({ ctx: 'board', rows: [{ name: 'Solo', hidden: '', direct: '', player: '8000001', playerRoot: '8000001' }] });
+assert(byId('PlRoot', H.rows[0]).GetAttributeString('account', '') === '8000001', 'scoreboard: player_account_id probe');
+overlay.urls = [];
+byId('PlDeadchaps', H.rows[0]).events.onactivate();
+assert(overlay.urls.includes('https://www.deadchaps.gg/player/8000001/'), 'scoreboard DeadChaps click from player_account_id');
+
+// layout-provided slot: bind the existing buttons, do not inject a second host
+start({ ctx: 'board', rows: [{ name: 'Ally', hidden: '2000001', direct: '2000001', layoutSlot: true }] });
+assert(H.rows[0].FindChild('PlRoot') && H.rows[0].FindChild('PlRoot').BHasClass('PlSlot'), 'scoreboard: uses the layout slot');
+assert(byId('PlRoot', H.rows[0]).GetAttributeString('account', '') === '2000001', 'scoreboard layout slot: account');
+overlay.urls = [];
+byId('PlStatlocker', H.rows[0]).events.onactivate();
+assert(overlay.urls.includes('https://statlocker.gg/profile/2000001'), 'scoreboard layout slot: Statlocker click');
 
 // default-off store
 start({ store: { v: 1, on: false } });

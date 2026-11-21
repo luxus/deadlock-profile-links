@@ -1,4 +1,7 @@
-/* Deadlock Profile Links — our own styles. Hidden probes, a compact row of badge + two link buttons. */
+/* Deadlock Profile Links — hidden probes, a compact row of badge + two link buttons.
+   On the scoreboard the buttons sit in .PlSlot AFTER the stats row, so Valve's
+   Souls/KDA/Damage/Healing/Items columns stay under their header. Logos are the
+   compiled Panorama textures (*_png.vtex), not the raw PNGs. */
 
 .PlProbe {
 	visibility: collapse;
@@ -24,6 +27,20 @@
 
 .Pl_row {
 	margin-left: 4px;
+}
+
+/* Scoreboard: one slot after the stats row. Totals rows have no player to link. */
+.PlSlot {
+	height: 48px;
+	vertical-align: middle;
+	margin-left: 8px;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	flow-children: right;
+}
+
+.Player.TotalsRow .PlSlot {
+	visibility: collapse;
 }
 
 .PlBadge {
@@ -54,8 +71,31 @@
 	padding: 3px;
 }
 
+.PlSlot .PlButton {
+	width: 34px;
+	height: 34px;
+	margin-right: 4px;
+	vertical-align: middle;
+	background-color: #07130fdd;
+	border-radius: 50%;
+	padding: 0px;
+	pre-transform-scale2d: 1;
+	transition-property: pre-transform-scale2d, brightness;
+	transition-duration: 0.08s;
+	transition-timing-function: ease-in-out;
+}
+
+.PlSlot .PlButton:hover {
+	brightness: 1.5;
+	pre-transform-scale2d: 1.12;
+}
+
 .PlButton:hover {
 	background-color: #000000cc;
+}
+
+.PlSlot .PlButton:hover {
+	background-color: #07130fdd;
 }
 
 .PlButton:disabled {
@@ -70,10 +110,17 @@
 	background-position: 50% 50%;
 }
 
+.PlSlot .PlLogo {
+	width: 30px;
+	height: 30px;
+	horizontal-align: center;
+	vertical-align: middle;
+}
+
 .PlLogoStatlocker {
-	background-image: url("s2r://panorama/images/profile_links/statlocker.vtex");
+	background-image: url("s2r://panorama/images/profile_links/statlocker_png.vtex");
 }
 
 .PlLogoDeadchaps {
-	background-image: url("s2r://panorama/images/profile_links/deadchaps.vtex");
+	background-image: url("s2r://panorama/images/profile_links/deadchaps_png.vtex");
 }
