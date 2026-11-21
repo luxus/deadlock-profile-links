@@ -1,4 +1,4 @@
 build/
-*.vpk
+site/files/*.vpk
 vanilla/*.vxml_c
 /tmp/

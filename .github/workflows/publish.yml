@@ -46,8 +46,11 @@ jobs:
             git worktree add --detach /tmp/pages && cd /tmp/pages && git checkout --orphan gh-pages
           fi
           git rm -rq . 2>/dev/null || true
+          git clean -fdx
           cp -a "$GITHUB_WORKSPACE/site/." .
+          rm -f .gitignore
           git add -A
+          git add -f files/*.vpk
           git diff --cached --quiet || git commit -qm "chore(pages): DMM source for $V"
           git push origin gh-pages
       - name: Draft the GitHub release with the VPK
